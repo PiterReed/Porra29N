@@ -76,12 +76,12 @@ fieldset{border:0;margin:0;padding:0;min-width:0}
 <script>
 window.PORRA_CONFIG = {
   firebase: {
-    apiKey: "AIzaSyDwpLtgMsUstDDX7uH6tFEYB8FzHjLMYt0",
-   authDomain: "porra29n.firebaseapp.com",
-    projectId: "porra29n",
-    appId: "1:772372909889:web:0b27dbf7a6303cdf0c1bc0"
+    apiKey: "PEGA_AQUI",
+    authDomain: "PEGA_AQUI.firebaseapp.com",
+    projectId: "PEGA_AQUI",
+    appId: "PEGA_AQUI"
   },
-  adminEmail: "pedroazkarre@gmail.com",            // quien puede meter el resultado oficial
+  adminEmail: "TU_CORREO@gmail.com",            // quien puede meter el resultado oficial
   cierre: "2026-11-29T20:00:00+01:00"           // hora a la que se cierran las apuestas
 };
 </script>
@@ -113,7 +113,8 @@ const C=window.PORRA_CONFIG,$=s=>document.querySelector(s);
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const HEMI=[['bildu','EH Bildu','#a3c614'],['podemos','Podemos','#6c2a6a'],['fa','Frente Amplio','#e4157f'],['erc','ERC','#f5a623'],['bng','BNG','#7cc6ea'],['psoe','PSOE','#e1251b'],['pnv','PNV','#2e8b3e'],['junts','Junts','#19b5a5'],['cc','Coalición Canaria','#f2d300'],['otros','Otros','#9a9a9a'],['upn','UPN','#2b4c8c'],['pp','PP','#1c7fd0'],['salf','Se Acabó La Fiesta','#5a5a5a'],['vox','Vox','#5cb531']].map(([id,n,c])=>({id,n,c}));
 const P=Object.fromEntries(HEMI.map(p=>[p.id,p]));
-const ORDER=['pp','psoe','vox','fa','podemos','erc','junts','bildu','pnv','bng','cc','upn','salf','otros'];
+const ORDER=['psoe','pp','vox','fa','pnv','bildu','podemos','erc','junts','bng','cc','upn','salf','otros'];
+const room=id=>TOTAL-(sum(draft.seats)-(draft.seats[id]||0));
 const INK={cc:'#2a2200',bng:'#06324a',bildu:'#1f2a00',erc:'#3a2300'};
 const TOTAL=350,MAJ=176,CLOSE=new Date(C.cierre).getTime();
 const blank=()=>Object.fromEntries(ORDER.map(id=>[id,0]));
@@ -179,7 +180,7 @@ const fail=e=>{const c=String(e&&(e.code||e.message)||e);msg(/permission/.test(c
 document.addEventListener('click',async ev=>{
   const b=ev.target.closest('button');if(!b)return;
   if(b.dataset.v){view=b.dataset.v;hemi();return}
-  if(b.dataset.d){const id=b.dataset.id;draft.seats[id]=Math.max(0,Math.min(TOTAL,draft.seats[id]+ +b.dataset.d));$('#s-'+id).value=draft.seats[id];view='draft';touched=true;count();hemi();return}
+  if(b.dataset.d){const id=b.dataset.id;draft.seats[id]=Math.max(0,Math.min(room(id),draft.seats[id]+ +b.dataset.d));$('#s-'+id).value=draft.seats[id];view='draft';touched=true;count();hemi();return}
   const a=b.dataset.a;
   if(a==='ver'){view=b.dataset.n;hemi();$('#tabs').scrollIntoView({block:'nearest'});return}
   if(a==='del'){if(!delMine){delMine=true;list();return}delMine=false;try{await F.deleteDoc(F.doc(db,'apuestas',uid));draft={name:draft.name,seats:blank()};msg('Apuesta borrada.')}catch(e){fail(e)}return}
@@ -194,7 +195,7 @@ document.addEventListener('click',async ev=>{
 });
 document.addEventListener('input',ev=>{const t=ev.target;
   if(t.id==='nm'){draft.name=t.value;touched=true;count();return}
-  if(t.dataset.id){draft.seats[t.dataset.id]=Math.max(0,Math.min(TOTAL,parseInt(t.value)||0));view='draft';touched=true;count();hemi()}});
+  if(t.dataset.id){{const id=t.dataset.id,raw=parseInt(t.value)||0,v=Math.max(0,Math.min(room(id),raw));draft.seats[id]=v;if(raw!==v||t.value==='')t.value=v}view='draft';touched=true;count();hemi()}});
 all();
 if(String(C.firebase.projectId).includes('PEGA_AQUI')){banner('Falta configurar Firebase en el bloque PORRA_CONFIG de index.html (ver README). Ahora mismo no se guarda nada.')}
 else{try{
